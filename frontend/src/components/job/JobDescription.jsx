@@ -35,6 +35,16 @@ const translateText = async (text, targetLang) => {
   }
 };
 
+// 🗺️ Function to redirect to Google Maps
+const openInGoogleMaps = (address) => {
+  if (!address) {
+    toast.error("Location not available");
+    return;
+  }
+  const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(address)}`;
+  window.open(mapUrl, "_blank");
+};
+
 const JobDescription = () => {
   const dispatch = useDispatch();
   const params = useParams();
@@ -172,6 +182,7 @@ const JobDescription = () => {
             </div>
 
             <div className="space-y-6 text-gray-800">
+              {/* 🧑 Role */}
               <div className="text-xl font-semibold text-orange-600 flex items-center gap-2">
                 <Briefcase className="w-5 h-5" />
                 Role:{" "}
@@ -180,22 +191,31 @@ const JobDescription = () => {
                 </span>
               </div>
 
-              <div className="text-xl font-semibold text-orange-600 flex items-center gap-2">
-                <MapPin className="w-5 h-5" />
+              {/* 📍 Location with map redirect */}
+              <div
+                className="text-xl font-semibold text-orange-600 flex items-center gap-2 cursor-pointer hover:underline"
+                onClick={() => openInGoogleMaps(translatedJob?.location)}
+                title="View on Google Maps"
+              >
+                <MapPin className="w-5 h-5 text-red-600" />
                 Location:{" "}
-                <span className="font-normal text-gray-700">
+                <span className="font-normal text-blue-600 hover:text-blue-800">
                   {translatedJob?.location}
                 </span>
               </div>
 
-              <div className="text-xl font-semibold text-orange-600 flex items-center gap-2">
-                <FileText className="w-5 h-5" />
-                Description:
-                <p className="text-gray-500 leading-relaxed pl-8">
-                  {translatedJob?.description}
-                </p>
+              {/* 📝 Description */}
+              <div className="text-xl font-semibold text-orange-600 flex items-start gap-2">
+                <FileText className="w-5 h-5 mt-1" />
+                <div>
+                  Description:
+                  <p className="text-gray-500 leading-relaxed pl-8">
+                    {translatedJob?.description}
+                  </p>
+                </div>
               </div>
 
+              {/* 📊 Other job details */}
               <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mt-6 text-gray-700">
                 <div className="flex items-center gap-2">
                   <Clock className="text-orange-500" />

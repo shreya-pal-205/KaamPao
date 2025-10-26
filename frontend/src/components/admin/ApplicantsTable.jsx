@@ -47,7 +47,7 @@ const ApplicantsTable = () => {
               <TableHead>Full Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Contact</TableHead>
-              <TableHead>Resume</TableHead>
+              <TableHead>Auto Summary</TableHead>
               <TableHead>Date</TableHead>
               <TableHead className="text-right">Action</TableHead>
             </TableRow>
@@ -64,25 +64,24 @@ const ApplicantsTable = () => {
                   <TableCell>{item?.applicant?.fullname}</TableCell>
                   <TableCell>{item?.applicant?.email}</TableCell>
                   <TableCell>{item?.applicant?.phone}</TableCell>
-                  <TableCell>
-                    {item?.applicant?.profile?.resume ? (
-                      <a
-                        href={item?.applicant?.profile?.resume}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-orange-600 underline hover:text-orange-800"
-                      >
-                        {item?.applicant?.profile?.resumeOriginalName}
-                      </a>
+
+                  {/* ✅ Auto Summary Section */}
+                  <TableCell className="max-w-sm whitespace-pre-line text-orange-700">
+                    {item?.applicant?.profile?.summary ? (
+                      <p className="text-sm leading-snug">
+                        {item.applicant.profile.summary}
+                      </p>
                     ) : (
-                      <span className="text-orange-400 italic">NA</span>
+                      <span className="text-orange-400 italic">Summary not generated yet</span>
                     )}
                   </TableCell>
+
                   <TableCell>
                     <span className="bg-orange-100 text-orange-800 px-2 py-1 rounded-full text-xs font-medium">
                       {item?.applicant?.createdAt?.split('T')[0]}
                     </span>
                   </TableCell>
+
                   <TableCell className="text-right">
                     <Popover>
                       <PopoverTrigger className="text-orange-600 hover:text-orange-800">

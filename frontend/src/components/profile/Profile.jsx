@@ -1,20 +1,18 @@
 import React, { useState } from "react";
-import { Mail, Phone, FileDown, BadgeCheck, Pencil } from "lucide-react";
+import { Mail, Phone, BadgeCheck } from "lucide-react";
 import { Button } from "../ui/button";
 import Navbar from "../shared/Navbar";
 import AppliedJobTable from "./AppliedJobTable";
 import UpdateProfile from "./UpdateProfile";
 import { useSelector } from "react-redux";
-import store from "@/redux/store";
 import { Label } from "@radix-ui/react-label";
 import useGetAppliedJobs from "@/hooks/useGetAppliedJobs";
-
-const isResume = true;
 
 const Profile = () => {
   useGetAppliedJobs();
   const [open, setOpen] = useState(false);
   const { user } = useSelector((store) => store.auth);
+
   return (
     <>
       <Navbar />
@@ -59,7 +57,7 @@ const Profile = () => {
               Skills
             </h2>
             <div className="flex flex-wrap gap-3">
-              {user?.profile?.skills.length !== 0 ? (
+              {user?.profile?.skills?.length ? (
                 user?.profile?.skills.map((skill, idx) => (
                   <span
                     key={idx}
@@ -69,30 +67,31 @@ const Profile = () => {
                   </span>
                 ))
               ) : (
-                <span> NA </span>
+                <span>NA</span>
               )}
             </div>
           </div>
 
-          {/* Resume Button */}
-          <div className="grid w-full max-w-sm items-center gap-1.5">
-            <Label className="text-md font-bold">Resume</Label>
-            {isResume ? (
-              <a
-                target="blank"
-                href={user?.profile?.resume}
-                className="text-blue-500 w-full hover:underline cursor-pointer"
-              >
-                {user?.profile?.resumeOriginalName}
-              </a>
-            ) : (
-              <span>NA</span>
-            )}
+          {/* Auto-Generated Resume Summary */}
+          <div className="w-full mt-6">
+            <Label className="text-md font-bold text-orange-700">
+              Auto-Generated Summary
+            </Label>
+            <div className="bg-orange-50 border border-orange-200 text-gray-800 rounded-xl p-4 mt-2 whitespace-pre-line">
+              {user?.profile?.summary ? (
+                user.profile.summary
+              ) : (
+                <span className="text-gray-500 italic">
+                  No summary yet — edit your profile to generate it automatically.
+                </span>
+              )}
+            </div>
           </div>
 
+          {/* Applied Jobs */}
           <div className="my-8">
             <h1 className="text-3xl font-extrabold text-orange-800 tracking-wide mb-4">
-              Your Applied Jobs  :)
+              Your Applied Jobs :)
             </h1>
             <AppliedJobTable />
           </div>

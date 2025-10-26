@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema({
       type: [String],
       default: []
     },
+    summary: {
+      type: String,
+      default: ''
+    },
     resume: {
       type: String, // file path or URL
       default: ''

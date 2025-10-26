@@ -6,19 +6,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "../ui/dialog";
-
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
-import { Loader2, Pencil, Save, UploadCloud } from "lucide-react";
+import { Loader2, Pencil } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { USER_API_END_POINT } from "@/utils/constant";
 import { toast } from "sonner";
 import { setUser } from "@/redux/authSlice";
-import store from "@/redux/store";
 
 const UpdateProfile = ({ open, setOpen }) => {
   const [loading, setLoading] = useState(false);
@@ -29,8 +26,7 @@ const UpdateProfile = ({ open, setOpen }) => {
     email: user?.email || "",
     phone: user?.phone || "",
     bio: user?.profile?.bio || "",
-    skills: user?.profile?.skills?.map((skill) => skill) || "",
-    file: user?.profile?.resume || "",
+    skills: user?.profile?.skills?.join(", ") || "",
   });
 
   const dispatch = useDispatch();
@@ -39,57 +35,51 @@ const UpdateProfile = ({ open, setOpen }) => {
     setInput({ ...input, [e.target.name]: e.target.value });
   };
 
-  const changeFileHandler = (e) => {
-    const file = e.target.files?.[0];
-    setInput({ ...input, file });
+  // Function to auto-generate a short worker summary
+  const generateSummary = (input) => {
+    const { fullname, bio, phone, email, skills } = input;
+    return `
+👷‍♂️ ${fullname} is a hardworking and skilled worker.
+💬 About: ${bio || "No bio provided yet."}
+📞 Contact: ${phone || "N/A"} | ✉️ ${email || "N/A"}
+🛠️ Skills: ${skills || "Not specified"}
+    `.trim();
   };
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append("fullname", input.fullname);
-    formData.append("email", input.email);
-    formData.append("phone", input.phone);
-    formData.append("bio", input.bio);
-    formData.append("skills", input.skills);
-    if (input.file) {
-      formData.append("file", input.file);
-    }
+    const summary = generateSummary(input);
+
     try {
       setLoading(true);
       const res = await axios.post(
         `${USER_API_END_POINT}/profile/update`,
-        formData,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          withCredentials: true,
-        }
+          fullname: input.fullname,
+          email: input.email,
+          phone: input.phone,
+          bio: input.bio,
+          skills: input.skills,
+          summary,
+        },
+        { withCredentials: true }
       );
+
       if (res.data.success) {
         dispatch(setUser(res.data.user));
-        toast.success(res.data.message);
+        toast.success("Profile updated successfully!");
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || "Update failed!");
     } finally {
       setLoading(false);
     }
     setOpen(false);
-    console.log(input);
   };
 
   return (
     <Dialog open={open}>
-      <DialogTrigger asChild>
-        <Button className="bg-orange-600 hover:bg-orange-700 text-white flex items-center gap-2">
-          <Pencil size={18} />
-          Edit Profile ✍️
-        </Button>
-      </DialogTrigger>
-
       <DialogContent
         className="max-w-2xl bg-gradient-to-br from-orange-50 to-white border border-orange-200 shadow-xl rounded-xl p-6"
         onInteractOutside={() => setOpen(false)}
@@ -99,31 +89,26 @@ const UpdateProfile = ({ open, setOpen }) => {
             🔧 Update Your Profile
           </DialogTitle>
           <DialogDescription className="text-sm text-gray-500">
-            Update your personal information and resume here.
+            Update your personal information and skills. Your auto-summary will be generated automatically.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={submitHandler} className="grid gap-4 mt-4">
-          {/* Full Name */}
           <div className="grid gap-1">
             <Label className="text-orange-700 font-medium">Full Name</Label>
             <Input
               placeholder="e.g. Shreyashi Pal"
-              className="bg-white border border-orange-200"
-              id="fullname"
               name="fullname"
               value={input.fullname}
               onChange={changeEventHandler}
+              className="bg-white border border-orange-200"
             />
           </div>
 
-          {/* Email */}
           <div className="grid gap-1">
             <Label className="text-orange-700 font-medium">Email</Label>
             <Input
-              placeholder="e.g. shreyashi@email.com"
               type="email"
-              id="email"
               name="email"
               value={input.email}
               onChange={changeEventHandler}
@@ -131,12 +116,9 @@ const UpdateProfile = ({ open, setOpen }) => {
             />
           </div>
 
-          {/* Phone */}
           <div className="grid gap-1">
             <Label className="text-orange-700 font-medium">Phone</Label>
             <Input
-              placeholder="e.g. +91 9876543210"
-              id="phone"
               name="phone"
               value={input.phone}
               onChange={changeEventHandler}
@@ -144,12 +126,9 @@ const UpdateProfile = ({ open, setOpen }) => {
             />
           </div>
 
-          {/* Skills */}
           <div className="grid gap-1">
             <Label className="text-orange-700 font-medium">Skill Set</Label>
             <Input
-              placeholder="e.g. React, Node.js, MongoDB"
-              id="skills"
               name="skills"
               value={input.skills}
               onChange={changeEventHandler}
@@ -157,25 +136,9 @@ const UpdateProfile = ({ open, setOpen }) => {
             />
           </div>
 
-          {/* Resume Upload */}
-          <div className="grid gap-1">
-            <Label className="text-orange-700 font-medium">Resume</Label>
-            <Input
-              type="file"
-              id="file"
-              name="file"
-              accept="application/pdf"
-              onChange={changeFileHandler}
-              className="bg-white border border-orange-200 cursor-pointer"
-            />
-          </div>
-
-          {/* Description */}
           <div className="grid gap-1">
             <Label className="text-orange-700 font-medium">About You</Label>
             <Input
-              placeholder="bio"
-              id="bio"
               name="bio"
               value={input.bio}
               onChange={changeEventHandler}
@@ -185,13 +148,12 @@ const UpdateProfile = ({ open, setOpen }) => {
 
           <DialogFooter>
             {loading ? (
-              <Button className="w-full my-4">
-                {" "}
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait{" "}
+              <Button className="w-full my-4" disabled>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Please wait
               </Button>
             ) : (
               <Button type="submit" className="w-full my-4">
-                Update
+                Save Changes
               </Button>
             )}
           </DialogFooter>

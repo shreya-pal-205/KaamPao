@@ -99,49 +99,59 @@ export const logout = async (req, res) => {
 
 
 
+export const updateProfile = async (req, res) => {
+  try {
+    const { fullname, email, phone, bio, skills, summary } = req.body;
+    const file = req.file;
+    const userId = req.id; // assuming middleware sets this from JWT
 
-export const updateProfile = async(req, res) =>{
-    try{
-        const {fullname, email, phone, bio, skills} = req.body;
-        const file = req.file;
-        
-        let skillsArray;
-        if(skills){
-            skillsArray = skills.split(",");
-        }
-        const userId = req.id;
-        let user = await User.findById(userId);
-
-        if(!user){
-            return res.status(400).json({
-                message: "User not found",
-                success: false
-            });
-        }
-
-        if(fullname)  user.fullname = fullname
-        if(email) user.email = email
-        if(phone)  user.phone = phone
-        if(bio)  user.profile.bio = bio
-        if(skills)  user.profile.skills = skillsArray
-
-
-        await user.save();
-
-        return res.status(200).json({
-            success: true,
-            message: "Profile updated successfully",
-            user : {
-          _id: user._id,
-          fullname: user.fullname,
-          email: user.email,
-          phone: user.phone,
-          role: user.role,
-          profile : user.profile
-        }
-        })
-
-    }catch(error){
-        console.log(error);
+    let user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
-}
+
+    // Convert skills string → array
+    let skillsArray = skills
+      ? skills.split(",").map((s) => s.trim()).filter((s) => s.length > 0)
+      : [];
+
+    // Update base fields
+    if (fullname) user.fullname = fullname;
+    if (email) user.email = email;
+    if (phone) user.phone = phone;
+
+    // Update nested profile fields
+    if (bio) user.profile.bio = bio;
+    if (skillsArray.length > 0) user.profile.skills = skillsArray;
+    if (summary) user.profile.summary = summary; // ✅ ADD THIS LINE
+
+    // Optionally handle file uploads if needed
+    if (file) {
+      user.profile.resume = file.path;
+    }
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user: {
+        _id: user._id,
+        fullname: user.fullname,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        profile: user.profile,
+      },
+    });
+  } catch (error) {
+    console.error("Profile update error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error while updating profile",
+    });
+  }
+};
