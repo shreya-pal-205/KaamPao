@@ -1,19 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import Navbar from '../shared/Navbar';
-import { FaMicrophone, FaKeyboard, FaLanguage, FaRegLightbulb, FaRobot } from 'react-icons/fa';
+import { FaMicrophone, FaKeyboard, FaLanguage, FaRegLightbulb, FaRobot, FaStopCircle } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 const JobSuggestion = () => {
-  const {user} = useSelector(store => store.auth);
+  const { user } = useSelector(store => store.auth);
   const [transcript, setTranscript] = useState('');
   const [inputText, setInputText] = useState('');
   const [suggestions, setSuggestions] = useState('');
   const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [language, setLanguage] = useState('hi-IN');
   const recognitionRef = useRef(null);
-
+  const utteranceRef = useRef(null);
 
   const navigate = useNavigate();
 
@@ -31,8 +32,19 @@ const JobSuggestion = () => {
     const synth = window.speechSynthesis;
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = language;
-    synth.cancel();
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
+    synth.cancel(); // stop previous speech
+    utteranceRef.current = utterance;
     synth.speak(utterance);
+  };
+
+  const stopSpeaking = () => {
+    const synth = window.speechSynthesis;
+    synth.cancel();
+    setIsSpeaking(false);
   };
 
   const fetchJobSuggestions = async (query) => {
@@ -83,12 +95,11 @@ const JobSuggestion = () => {
     }
   };
 
-
   useEffect(() => {
-      if (!user) {
-        navigate("/signup");
-      }
-    }, []);
+    if (!user) {
+      navigate("/signup");
+    }
+  }, []);
 
   return (
     <>
@@ -154,6 +165,16 @@ const JobSuggestion = () => {
             >
               {isListening ? '🎧 Listening...' : '🎤 Tap to Speak'}
             </button>
+
+            {/* Stop Voice Button */}
+            {isSpeaking && (
+              <button
+                onClick={stopSpeaking}
+                className="w-full mt-3 py-3 font-bold text-lg rounded-xl shadow-md bg-red-600 hover:bg-red-700 text-white flex items-center justify-center gap-2"
+              >
+                <FaStopCircle /> Stop Voice
+              </button>
+            )}
 
             {/* Transcript Display */}
             {transcript && (

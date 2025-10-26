@@ -12,46 +12,25 @@ const jobRates = {
 };
 
 const Earning = () => {
-  const {user} = useSelector(store => store.auth);
+  const { user } = useSelector((store) => store.auth);
   const [jobType, setJobType] = useState("Painter");
   const [hoursPerDay, setHoursPerDay] = useState(8);
   const [daysPerMonth, setDaysPerMonth] = useState(26);
   const [rate, setRate] = useState(jobRates["Painter"]);
   const [estimatedEarnings, setEstimatedEarnings] = useState(0);
-  const [voiceEnabled, setVoiceEnabled] = useState(true);
-
 
   const navigate = useNavigate();
 
   useEffect(() => {
     const earning = rate * hoursPerDay * daysPerMonth;
     setEstimatedEarnings(earning);
-    if (voiceEnabled) {
-      speakText(`Aapka estimated earning hoga ₹${earning}`);
-    }
   }, [jobType, rate, hoursPerDay, daysPerMonth]);
-
-  const speakText = (text) => {
-    if (!text || !voiceEnabled) return;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "hi-IN";
-    const voice = window.speechSynthesis
-      .getVoices()
-      .find((v) => v.lang === "hi-IN");
-    if (voice) utterance.voice = voice;
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
-  };
-
-
 
   useEffect(() => {
     if (!user) {
       navigate("/signup");
     }
   }, []);
-
-
 
   return (
     <>
@@ -63,8 +42,7 @@ const Earning = () => {
           </h1>
 
           <div className="mb-6 px-4 py-3 bg-orange-200 border-l-4 border-orange-500 rounded-xl shadow-sm text-sm text-orange-800 font-medium">
-            💡 Tip: Select your job and working hours to get an estimated
-            monthly earning!
+            💡 Tip: Select your job and working hours to get an estimated monthly earning!
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -131,22 +109,6 @@ const Earning = () => {
             </div>
           </div>
 
-          <div className="mt-6 flex items-center gap-3">
-            <input
-              type="checkbox"
-              checked={voiceEnabled}
-              onChange={() => setVoiceEnabled(!voiceEnabled)}
-              className="w-5 h-5 accent-orange-500"
-              id="voiceToggle"
-            />
-            <label
-              htmlFor="voiceToggle"
-              className="text-lg text-orange-800 font-medium"
-            >
-              🔊 Enable Voice Output
-            </label>
-          </div>
-
           <div className="mt-8 bg-yellow-50 border-l-4 border-yellow-400 rounded-xl p-6 shadow-md">
             <h3 className="text-2xl font-semibold text-yellow-800 mb-2">
               📊 Estimated Monthly Income
@@ -160,8 +122,8 @@ const Earning = () => {
           </div>
 
           <p className="mt-10 text-center text-sm text-gray-500">
-            ⚠️ Note: This is just an estimate. Actual income may vary based on
-            your location, experience, and employer.
+            ⚠️ Note: This is just an estimate. Actual income may vary based on your
+            location, experience, and employer.
           </p>
         </div>
       </div>

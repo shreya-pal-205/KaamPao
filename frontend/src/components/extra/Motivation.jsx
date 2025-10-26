@@ -1,21 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Navbar from '../shared/Navbar';
-import { FaLightbulb, FaSmile, FaMicrophone, FaLanguage, FaVolumeUp, FaSave } from 'react-icons/fa';
+import { FaLightbulb, FaSmile, FaMicrophone, FaLanguage, FaVolumeUp, FaSave, FaStopCircle } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 const Motivation = () => {
-  const {user} = useSelector(store => store.auth);
+  const { user } = useSelector(store => store.auth);
   const [promptInput, setPromptInput] = useState('');
   const [suggestions, setSuggestions] = useState('');
   const [isListening, setIsListening] = useState(false);
   const [language, setLanguage] = useState('hi-IN');
   const [voiceEnabled, setVoiceEnabled] = useState(true);
   const [availableVoices, setAvailableVoices] = useState([]);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const recognitionRef = useRef(null);
-
-
   const navigate = useNavigate();
 
   const languages = {
@@ -130,8 +129,17 @@ Keep the tone supportive, professional and uplifting.
     }
 
     utterance.voice = voice;
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
     synth.cancel();
     synth.speak(utterance);
+  };
+
+  const stopSpeaking = () => {
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
   };
 
   const saveToNotes = () => {
@@ -142,12 +150,11 @@ Keep the tone supportive, professional and uplifting.
     link.click();
   };
 
-
   useEffect(() => {
-      if (!user) {
-        navigate("/signup");
-      }
-    }, []);
+    if (!user) {
+      navigate("/signup");
+    }
+  }, []);
 
   return (
     <>
@@ -218,6 +225,16 @@ Keep the tone supportive, professional and uplifting.
               {isListening ? '🎧 Listening...' : '🎤 Speak Your Interview Fear'}
             </button>
 
+            {/* Stop Voice Button */}
+            {isSpeaking && (
+              <button
+                onClick={stopSpeaking}
+                className="w-full py-3 mb-4 bg-red-600 hover:bg-red-700 text-white font-bold text-lg rounded-xl flex items-center justify-center gap-2 transition"
+              >
+                <FaStopCircle /> Stop Voice
+              </button>
+            )}
+
             {/* Transcript Display */}
             {promptInput && (
               <div className="mb-4 p-4 bg-orange-50 border-l-4 border-orange-400 rounded-lg shadow-sm">
@@ -234,7 +251,7 @@ Keep the tone supportive, professional and uplifting.
                   {suggestions}
                 </p>
 
-                <div className="flex gap-4 mt-6">
+                <div className="flex flex-wrap gap-4 mt-6">
                   {voiceEnabled && (
                     <button
                       onClick={() => speakOut(suggestions)}
