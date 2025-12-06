@@ -18,6 +18,11 @@ import ContractReader from './components/extra/ContractReader.jsx'
 import Earning from './components/extra/Earning.jsx'
 import Resume from './components/extra/Resume.jsx'
 import ProtectedRoute from './components/admin/ProtectedRoute.jsx'
+import axios from "axios";
+
+
+
+axios.defaults.withCredentials = true;
 
 
 
