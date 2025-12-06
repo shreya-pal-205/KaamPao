@@ -19,7 +19,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:5173', // your React app's origin
+  origin: 'https://kaampao.onrender.com', // your React app's origin
   credentials: true                // allow cookies, authorization headers, etc.
 }));
 app.use(cookieParser());
