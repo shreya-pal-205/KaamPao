@@ -51,7 +51,7 @@ const JobSuggestion = () => {
     const prompt = `Act like a job assistant for daily wage laborers. The user said: "${query}". Based on this, suggest job categories or types and nearby location suggestions in simple ${getLanguageName(language)}. Keep your answer short and friendly.`;
 
     try {
-      const res = await axios.post('http://localhost:8000/api/gemini-suggest', { prompt });
+      const res = await axios.post('https://kaampao-backend.onrender.com/api/gemini-suggest', { prompt });
       const text = res.data.suggestions;
       setSuggestions(text);
       speakText(text);

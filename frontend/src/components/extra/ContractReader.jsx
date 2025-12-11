@@ -59,7 +59,7 @@ const ContractReader = () => {
     try {
       setLoading(true);
       const res = await axios.post(
-        "http://localhost:8000/api/gemini-contract",
+        "https://kaampao-backend.onrender.com/api/gemini-contract",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },

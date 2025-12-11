@@ -96,7 +96,7 @@ Keep the tone supportive, professional and uplifting.
     `;
 
     try {
-      const res = await axios.post('http://localhost:8000/api/gemini-suggest', { prompt });
+      const res = await axios.post('https://kaampao-backend.onrender.com/api/gemini-suggest', { prompt });
       const text = res.data.suggestions;
       setSuggestions(text);
       if (voiceEnabled) speakOut(text);
