@@ -51,29 +51,36 @@ app.post('/api/gemini-suggest', async (req, res) => {
   const { prompt } = req.body;
 
   try {
+ 
     const result = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         contents: [
           {
+            role: "user",
             parts: [{ text: prompt }]
           }
         ]
       },
       {
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json"
         }
       }
     );
 
-    const response = result.data?.candidates?.[0]?.content?.parts?.[0]?.text || 'No suggestions found.';
-    res.json({ suggestions: response });
+    const responseText =
+      result.data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "No suggestions found.";
+
+    res.json({ suggestions: responseText });
+
   } catch (error) {
-    console.error('Gemini API error:', error.message);
-    res.status(500).json({ error: 'Gemini API request failed.' });
+    console.error("Gemini Suggest API error:", error.response?.data || error.message);
+    res.status(500).json({ error: "Gemini API request failed." });
   }
 });
+
 
 
 
@@ -91,10 +98,10 @@ app.post('/api/gemini-contract', upload.single('file'), async (req, res) => {
   try {
     const imageBuffer = req.file.buffer;
 
-    const {
-      data: { text: extractedText }
-    } = await Tesseract.recognize(imageBuffer, 'eng');
 
+    const { data: { text: extractedText } } = await Tesseract.recognize(imageBuffer, 'eng');
+
+   
     const prompt = `
 Read the following job contract text and:
 
@@ -109,27 +116,35 @@ ${extractedText}
 Use a supportive and protective tone for a vulnerable job seeker.
     `;
 
+   
     const geminiRes = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
-        contents: [{ parts: [{ text: prompt }] }],
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: prompt }]
+          }
+        ]
       },
       {
-        headers: { 'Content-Type': 'application/json' }
+        headers: { "Content-Type": "application/json" }
       }
     );
 
+    // Extract output text
     const responseText =
       geminiRes.data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      'Could not understand the contract. Please try again.';
+      "Could not understand the contract. Please try again.";
 
     res.json({ explanation: responseText });
 
   } catch (error) {
-    console.error('Contract reading failed:', error.message);
-    res.status(500).json({ error: 'Failed to analyze contract.' });
+    console.error("Gemini Contract API error:", error.response?.data || error.message);
+    res.status(500).json({ error: "Failed to analyze contract." });
   }
 });
+
 
 
 
